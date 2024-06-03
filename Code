@@ -62,8 +62,11 @@ float Distance(Vec2 a, Vec2 b) {
 
 bool CirclevsCircleUnoptimized( Circle a, Circle b )
 {
-  float r = a.radius + b.radius;  
-  return r < Distance( a.position, b.position );
+  float r = a.radius + b.radius;   
+   Distance distanceCalculator(a.position, b.position); // Create an instance of the Distance class
+  return r < distanceCalculator.calculateDistance(); // Call the class method 
+  
+
 }
 bool CirclevsCircleOptimized( Circle a, Circle b )
 {
@@ -79,4 +82,4 @@ bool CirclevsCircleOptimized( Circle a, Circle b )
 //   float r = a.radius + b.radius;
 //   r *= r
 //   return r < (a.x + b.x)^2 + (a.y + b.y)^2
-// } 
+// }
