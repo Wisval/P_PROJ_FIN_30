@@ -28,7 +28,7 @@ struct Object {
   Vec2 velocity;
   float restitution;
   float mass;
-  
+  float inv_mass;
   // Add other necessary members as needed
 };
 
@@ -76,20 +76,32 @@ bool CirclevsCircleOptimized(Circle a, Circle b) {
 }
 
 
-// Object X {{velocity}, restitution, mass}
+// Object X {{velocity}, restitution, mass, inv_mass}
 
-Object A = {{10, 0}, 0.8f, 1.0f};
-Object B = {{10, 0}, 0.8f, 1.0f};
+Object A = {{10, 0}, 0.8f, 1.0f, 1.0f / 2.0f}; 
+
+Object B = {{10, 0}, 0.8f, 1.0f, 1.0f / 2.0f}; 
+
+
+
+
+
+
+
 
 // Given two objects A and B 
 float e = std::min( A.restitution, B.restitution );
 
 
+float DotProduct(Vec2 a, Vec2 b) {
+  return a.x * b.x + a.y * b.y; 
+}
 
-void ResolveCollision( Object A, Object B )
+
+void ResolveCollision( Object A, Object B, Vec2 normal )
 {
   // Calculate relative velocity 
-  Vec2 rv = B.velocity - A.velocity;
+  Vec2 rv = {B.velocity.x - A.velocity.x, B.velocity.y - A.velocity.y};
   // Calculate relative velocity in terms of the normal direction 
   float velAlongNormal = DotProduct( rv, normal );
   // Do not resolve if velocities are separating 
@@ -98,13 +110,22 @@ void ResolveCollision( Object A, Object B )
   // Calculate restitution 
   float e = std::min( A.restitution, B.restitution);
   // Calculate impulse scalar 
-  float j = -(1 + e) * velAlongNormal
-  j /= 1 / A.mass + 1 / B.mass
+  float j = -(1 + e) * velAlongNormal;
+  j /= 1 / A.mass + 1 / B.mass;
   // Apply impulse 
-  Vec2 impulse = j * normal
-  A.velocity -= 1 / A.mass * impulse
-  B.velocity += 1 / B.mass * impulse
+  Vec2 impulse = {j * normal.x, j * normal.y};
+  A.velocity.x -= 1 / A.mass * impulse.x;
+  A.velocity.y -= 1 / A.mass * impulse.y;
+  B.velocity.x += 1 / B.mass * impulse.x;
+  B.velocity.y += 1 / B.mass * impulse.y;
 }
+
+
+float mass_sum = A.mass + B.mass;
+float ratio = A.mass / mass_sum;
+A.velocity -= ratio * impulse
+ratio = B.mass / mass_sum
+B.velocity += ratio * impulse
 
 
 
