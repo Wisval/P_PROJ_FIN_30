@@ -76,11 +76,11 @@ bool CirclevsCircleOptimized(Circle a, Circle b) {
 }
 
 
-// Object X {{velocity}, restitution, mass, inv_mass}
+// Object X {{velocity}, restitution, mass, inv_mass= 1/mass}
 
-Object A = {{10, 0}, 0.8f, 1.0f, 1.0f / 2.0f}; 
+Object A = {{10, 0}, 0.8f, 2.0f, 1.0f / 2.0f}; 
 
-Object B = {{10, 0}, 0.8f, 1.0f, 1.0f / 2.0f}; 
+Object B = {{10, 0}, 0.8f, 2.0f, 1.0f / 2.0f}; 
 
 
 
@@ -118,16 +118,18 @@ void ResolveCollision( Object A, Object B, Vec2 normal )
   A.velocity.y -= 1 / A.mass * impulse.y;
   B.velocity.x += 1 / B.mass * impulse.x;
   B.velocity.y += 1 / B.mass * impulse.y;
+
+
+
+  float mass_sum = A.mass + B.mass;
+  float ratio = A.mass / mass_sum;
+  A.velocity.x -= ratio * impulse.x;
+  A.velocity.y -= ratio * impulse.y;
+  ratio = B.mass / mass_sum;
+  B.velocity.x += ratio * impulse.x;
+  B.velocity.y += ratio * impulse.y;
+
 }
-
-
-float mass_sum = A.mass + B.mass;
-float ratio = A.mass / mass_sum;
-A.velocity -= ratio * impulse
-ratio = B.mass / mass_sum
-B.velocity += ratio * impulse
-
-
 
 
 
@@ -137,4 +139,3 @@ B.velocity += ratio * impulse
 
 //   return 0;
 // }
-
