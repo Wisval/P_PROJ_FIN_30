@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+//#include <vector> I dont even use this, though it could be helpful and more efficient to use though I would have to overhall the code to make it work
 
 
 struct Vec {
@@ -23,12 +24,12 @@ struct AABB {
   Vec2 max;
 };
 
-
 struct Object {
   Vec2 velocity;
   float restitution;
   float mass;
   float inv_mass;
+  Vec2 position;
   // Add other necessary members as needed
 };
 
@@ -38,24 +39,9 @@ bool AABBvsAABB(AABB a, AABB b) {
     return false;
   if (a.max.y < b.min.y or a.min.y > b.max.y)
     return false;
-  // No separating axis found, therefor there is at least one overlapping axis
+  // No separating axis found, therefore there is at least one overlapping axis
   return true;
 };
-
-// class Distance {
-// public:
-//   Distance(Vec2 a, Vec2 b) { // Constructor
-//     this->a = a;
-//     this->b = b;
-//   }
-
-//   float calculateDistance() { // Method to calculate distance
-//     return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
-//   }
-// private:
-//   Vec2 a;
-//   Vec2 b;
-//};
 
 float Distance(Vec2 a, Vec2 b) {
   return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
@@ -75,51 +61,40 @@ bool CirclevsCircleOptimized(Circle a, Circle b) {
                  (a.position.y - b.position.y) * (a.position.y - b.position.y);
 }
 
-
 // Object X {{velocity}, restitution, mass, inv_mass= 1/mass}
 
-Object A = {{10, 0}, 0.8f, 2.0f, 1.0f / 2.0f}; 
+Object A = {{10, 0}, 0.8f, 2.0f, 1 / A.mass};
 
-Object B = {{10, 0}, 0.8f, 2.0f, 1.0f / 2.0f}; 
+Object B = {{10, 0}, 0.8f, 2.0f, 1 / B.mass};
 
+// Given two objects A and B
+float e = std::min(A.restitution, B.restitution);
 
+float DotProduct(Vec2 a, Vec2 b) { return a.x * b.x + a.y * b.y; }
 
+float penetration;
 
+Vec2 n;
 
-
-
-
-// Given two objects A and B 
-float e = std::min( A.restitution, B.restitution );
-
-
-float DotProduct(Vec2 a, Vec2 b) {
-  return a.x * b.x + a.y * b.y; 
-}
-
-
-void ResolveCollision( Object A, Object B, Vec2 normal )
-{
-  // Calculate relative velocity 
+void ResolveCollision(Object A, Object B, Vec2 normal) {
+  // Calculate relative velocity
   Vec2 rv = {B.velocity.x - A.velocity.x, B.velocity.y - A.velocity.y};
-  // Calculate relative velocity in terms of the normal direction 
-  float velAlongNormal = DotProduct( rv, normal );
-  // Do not resolve if velocities are separating 
-  if(velAlongNormal > 0)
+  // Calculate relative velocity in terms of the normal direction
+  float velAlongNormal = DotProduct(rv, normal);
+  // Do not resolve if velocities are separating
+  if (velAlongNormal > 0)
     return;
-  // Calculate restitution 
-  float e = std::min( A.restitution, B.restitution);
-  // Calculate impulse scalar 
+  // Calculate restitution
+  float e = std::min(A.restitution, B.restitution);
+  // Calculate impulse scalar
   float j = -(1 + e) * velAlongNormal;
   j /= 1 / A.mass + 1 / B.mass;
-  // Apply impulse 
+  // Apply impulse
   Vec2 impulse = {j * normal.x, j * normal.y};
   A.velocity.x -= 1 / A.mass * impulse.x;
   A.velocity.y -= 1 / A.mass * impulse.y;
   B.velocity.x += 1 / B.mass * impulse.x;
   B.velocity.y += 1 / B.mass * impulse.y;
-
-
 
   float mass_sum = A.mass + B.mass;
   float ratio = A.mass / mass_sum;
@@ -129,13 +104,27 @@ void ResolveCollision( Object A, Object B, Vec2 normal )
   B.velocity.x += ratio * impulse.x;
   B.velocity.y += ratio * impulse.y;
 
+  penetration = std::abs(DotProduct(
+      normal, {A.position.x - B.position.x, A.position.y - B.position.y}));
+
+  n = normal;
 }
 
+void PositionalCorrection(Object A, Object B) {
+  if (A.mass == 0)
+    A.inv_mass = 0;
+  else
+    A.inv_mass = 1 / A.mass;
 
-
-// int main() {
-
-//   Circle one = {5, {60, 50}};
-
-//   return 0;
-// }
+  const float percent = 0.2; // usually 20% to 80%
+  const float slop = 0.01;   // usually 0.01 to 0.1
+  Vec2 correction = {
+      static_cast<float>(fmax(penetration - slop, 0.0f) /
+                         (A.inv_mass + B.inv_mass) * percent * n.x),
+      static_cast<float>(fmax(penetration - slop, 0.0f) /
+                         (A.inv_mass + B.inv_mass) * percent * n.y)};
+  A.position.x -= A.inv_mass * correction.x;
+  A.position.y -= A.inv_mass * correction.y;
+  B.position.x += B.inv_mass * correction.x;
+  B.position.y += B.inv_mass * correction.y;
+}
