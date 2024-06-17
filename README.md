@@ -2,6 +2,8 @@
 
 #### Through the usage and tutorials by https://github.com/codecrafters-io/build-your-own-x?tab=readme-ov-file :
 ##### How to make your own Physics Engine.
+#### Code/Resources provided by the tutorial creator:
+##### https://github.com/tutsplus/ImpulseEngine
 
 
 
