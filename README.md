@@ -29,4 +29,17 @@ Most of the applications that I learned form class is the Logic of certain codin
 - Impulse resolution, the idea of reactions/actions of two objects after a collision based on mass, velocity, shape etc.
 - Collision Resolve
 - ObjectvsObject(CirclevsAABB, CirclevsCircle, AABBvsAABB)
-- 
+- Integration
+- Timestepping
+- Modular design
+  - Bodies
+  - Shapes
+  - Forces
+  - Materials
+- Broad Phase
+- Friction
+- Scene
+- rotation Math
+- Oriented Shapes
+- More Collision detection and resolution during rotation of object
+  
