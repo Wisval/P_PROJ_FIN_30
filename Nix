@@ -1,0 +1,23 @@
+{ pkgs ? import <nixpkgs> {} }:
+pkgs.buildStatic {
+	name = "sfml-static";
+	src = pkgs.fetchurl {
+		url = "https://www.sfml-dev.org/files/sfml-2.5.1-sources.zip";
+		sha256 = "08a13c098c339973216a297642aa05087d59300ab830f766103ab4c964287197";
+	};
+	buildInputs = [ pkgs.gcc pkgs.cmake pkgs.pkgconfig ];
+	buildPhase = ''
+		cmake -B build -DCMAKE_BUILD_TYPE=Release
+		cmake --build build --config Release --target install
+	'';
+	installPhase = ''
+		mkdir -p $out/lib
+		cp build/Release/lib/libsfml-graphics-d.a $out/lib/libsfml-graphics-d.a
+		cp build/Release/lib/libsfml-system-d.a $out/lib/libsfml-system-d.a
+		cp build/Release/lib/libsfml-window-d.a $out/lib/libsfml-window-d.a
+		cp build/Release/lib/libsfml-audio-d.a $out/lib/libsfml-audio-d.a
+		cp build/Release/lib/libsfml-network-d.a $out/lib/libsfml-network-d.a
+		mkdir -p $out/include
+		cp build/Release/include/* $out/include
+	'';
+}
