@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <SFML/Graphics.hpp>
 //#include <vector> I dont even use this, though it could be helpful and more
 // efficient to use though I would have to overhall the code to make it work
 
@@ -287,4 +288,35 @@ bool AABBvsCircle(Manifold *m) {
     }
     return true;
   }
+}
+
+
+  int main() {
+    // Create a window
+    sf::RenderWindow window(sf::VideoMode(800, 600), "My Window");
+    // Create a circle shape
+    sf::CircleShape circle(50.f);
+    circle.setFillColor(sf::Color::Red);
+    // Main game loop
+    while (window.isOpen()) {
+      // Process events
+      sf::Event event;
+      while (window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed)
+          window.close();
+      }
+      // Clear the window
+      window.clear(sf::Color::Black);
+      // Draw the circle
+      window.draw(circle);
+      // Display the window
+      window.display();
+    }
+    return 0;
+  }
+
+
+
+
+  
 }
