@@ -21,3 +21,4 @@ pkgs.buildStatic {
 		cp build/Release/include/* $out/include
 	'';
 }
+
